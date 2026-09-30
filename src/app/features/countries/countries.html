@@ -1,0 +1,139 @@
+<section>
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <div>
+      <h1 class="h2 mb-1">Countries</h1>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">Add country</button>
+  </div>
+
+  <app-error-alert [message]="error()" (dismiss)="error.set('')" />
+  @if (success()) {
+    <div class="alert alert-success alert-dismissible" role="status">
+      {{ success() }}
+      <button type="button" class="btn-close" (click)="success.set('')" aria-label="Dismiss message"></button>
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-header bg-body d-flex flex-column flex-md-row align-items-md-center gap-3 py-3">
+      <form class="input-group" style="max-width: 420px" (submit)="$event.preventDefault(); searchCountries()">
+        <input
+          type="search"
+          class="form-control"
+          name="countrySearch"
+          aria-label="Search countries"
+          placeholder="Search countries"
+          [value]="search"
+          (input)="search = $any($event.target).value"
+        />
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        @if (search) {
+          <button class="btn btn-outline-secondary" type="button" (click)="clearSearch()">Clear</button>
+        }
+      </form>
+      <span class="badge text-bg-secondary ms-md-auto">
+        {{ totalCount() }} {{ totalCount() === 1 ? 'country' : 'countries' }}
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+                        <th>ID</th>
+
+            <th class="ps-3">Country</th>
+            <th>Code</th>
+            <th class="text-end pe-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td colspan="4" class="text-center py-5">
+                <div class="spinner-border" role="status"><span class="visually-hidden">Loading…</span></div>
+              </td>
+            </tr>
+          } @else {
+            @for (country of countries(); track country.id) {
+              <tr>
+                                <td class="text-body-secondary">{{ country.id }}</td>
+
+                <td class="ps-3 fw-semibold">{{ country.name || 'Unnamed country' }}</td>
+                <td><span class="badge text-bg-light border">{{ country.code || '—' }}</span></td>
+                <td class="text-end pe-3">
+                  <button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="openEdit(country)">Edit</button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="remove(country)"
+                    [disabled]="deletingId() === country.id"
+                  >
+                    {{ deletingId() === country.id ? 'Deleting…' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center text-body-secondary py-5">
+                  {{ search ? 'No countries match your search.' : 'No countries have been added yet.' }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="load($event)" />
+  </div>
+</section>
+
+@if (modalOpen()) {
+  <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" (click)="closeModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5">{{ editing() ? 'Edit country' : 'Add country' }}</h2>
+          <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="countryName" class="form-label">Country name</label>
+              <input
+                id="countryName"
+                type="text"
+                class="form-control"
+                formControlName="name"
+                placeholder="e.g. Egypt"
+                [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid"
+              />
+              <div class="invalid-feedback">Country name is required.</div>
+            </div>
+            <div>
+              <label for="countryCode" class="form-label">Country code</label>
+              <input
+                id="countryCode"
+                type="text"
+                class="form-control"
+                formControlName="code"
+                placeholder="e.g. EGP"
+                [class.is-invalid]="form.controls.code.touched && form.controls.code.invalid"
+              />
+              <div class="invalid-feedback">Country code is required.</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : (editing() ? 'Save changes' : 'Add country') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+}

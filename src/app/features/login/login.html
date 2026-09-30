@@ -1,0 +1,61 @@
+<main class="container min-vh-100 d-flex align-items-center py-5">
+  <div class="row justify-content-center w-100 m-0">
+    <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+      <div class="text-center mb-4">
+        <h1 class="h3 mb-1">Admin</h1>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-1">Sign in</h2>
+
+          <app-error-alert [message]="error()" (dismiss)="error.set('')" />
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input
+                id="username"
+                type="text"
+                class="form-control"
+                formControlName="username"
+                autocomplete="username"
+                placeholder="Enter your username"
+                [class.is-invalid]="form.controls.username.touched && form.controls.username.invalid"
+              />
+              <div class="invalid-feedback">Username is required.</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label">Password</label>
+              <div class="input-group has-validation">
+                <input
+                  id="password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  class="form-control"
+                  formControlName="password"
+                  autocomplete="current-password"
+                  placeholder="Enter your password"
+                  [class.is-invalid]="form.controls.password.touched && form.controls.password.invalid"
+                />
+                <button class="btn btn-outline-secondary" type="button" (click)="showPassword.set(!showPassword())">
+                  {{ showPassword() ? 'Hide' : 'Show' }}
+                </button>
+                <div class="invalid-feedback">Password is required.</div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Signing in…
+              } @else {
+                Sign in
+              }
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
